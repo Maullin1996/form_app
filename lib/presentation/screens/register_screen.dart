@@ -43,83 +43,43 @@ class _RegisterView extends StatelessWidget {
   }
 }
 
-class _RegisterForm extends StatefulWidget {
+class _RegisterForm extends StatelessWidget {
   const _RegisterForm();
-
-  @override
-  State<_RegisterForm> createState() => _RegisterFormState();
-}
-
-class _RegisterFormState extends State<_RegisterForm> {
-  final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
     final registerCubit = context.watch<RegisterCubit>();
-    return Form(
-        key: _formkey,
-        child: Column(
-          children: [
-            CustomTextFormField(
-              label: 'User Name',
-              onChanged: (value) {
-                registerCubit.usernameChanged(value);
-                _formkey.currentState?.validate();
-              },
-              validator: (value) {
-                if (value == null || value.isEmpty) return 'Required Field';
-                if (value.trim().isEmpty) return 'Required Field';
-                if (value.length <= 3) {
-                  return 'The name must be at least 3 characters long';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 20),
-            CustomTextFormField(
-              label: 'email',
-              onChanged: (value) {
-                registerCubit.emailChange(value);
-                _formkey.currentState?.validate();
-              },
-              validator: (value) {
-                if (value == null || value.isEmpty) return 'Required Field';
-                if (value.trim().isEmpty) return 'Required Field';
-                final emailRegExp = RegExp(
-                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                );
-                if (!emailRegExp.hasMatch(value)) return 'Invalid Email';
-                return null;
-              },
-            ),
-            const SizedBox(height: 20),
-            CustomTextFormField(
-              label: 'Password',
-              obscureText: true,
-              onChanged: (value) {
-                registerCubit.passwordChanged(value);
-                _formkey.currentState?.validate();
-              },
-              validator: (value) {
-                if (value == null || value.isEmpty) return 'Required Field';
-                if (value.trim().isEmpty) return 'Required Field';
-                if (value.length <= 6) {
-                  return 'The name must be at least 6 characters long';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 20),
-            FilledButton.tonalIcon(
-                onPressed: () {
-                  final isValid = _formkey.currentState!.validate();
-                  if (!isValid) return;
+    final username = registerCubit.state.username;
+    final password = registerCubit.state.password;
+    final email = registerCubit.state.email;
 
-                  registerCubit.onSubmit();
-                },
-                label: const Text('Create User'),
-                icon: const Icon(Icons.save)),
-          ],
-        ));
+    return Form(
+        child: Column(
+      children: [
+        CustomTextFormField(
+            label: 'User Name',
+            onChanged: registerCubit.usernameChanged,
+            errorMessage: username.errorMessage),
+        const SizedBox(height: 20),
+        CustomTextFormField(
+          label: 'email',
+          onChanged: registerCubit.emailChanged,
+          errorMessage: email.errorMessage,
+        ),
+        const SizedBox(height: 20),
+        CustomTextFormField(
+            label: 'Password',
+            obscureText: true,
+            onChanged: registerCubit.passwordChanged,
+            errorMessage: password.errorMessage),
+        const SizedBox(height: 20),
+        FilledButton.tonalIcon(
+            onPressed: () {
+              registerCubit.onSubmit();
+            },
+            label: const Text('Create User'),
+            icon: const Icon(Icons.save)),
+      ],
+    ));
   }
 }
